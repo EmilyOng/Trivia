@@ -1,0 +1,55 @@
+{% extends "template.html" %}
+
+{% block content %}
+<center>
+  <button class="btn btn-dark" id="addToGlobal">Add to Global Questions</button>
+  <br/><br/>
+  <button class="btn btn-dark" id="addToPrivate">Add to Private Questions</button
+  <br/><br/><br/>
+  {% if submitted %}
+    <div class="alert alert-success alert-dismissible fade show col-4" role="alert">
+      You have submitted a question!
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  {% endif %}
+  {% if error_msg %}
+    <div class="alert alert-danger alert-dismissible fade show col-4" role="alert">
+      {{error_msg}}
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  {% endif %}
+  <form method="POST" id="addToGlobalForm" action="/addQuestion" style="display:none;">
+    <u>Add a Global Question</u><br/><br/>
+    <div class="form-group col-4 justify-content-center form-inline">
+      <label for="questionText">Question</label>&nbsp;
+      <input type="text" class="form-control" id="questionText" name="questionText" placeholder="Enter Question" value="" required>
+    </div>
+    <div class="form-group col-4">
+      <label for="answer">Set Answer</label>
+      <select multiple class="form-control" name="answer" id="answer" required>
+      </select>
+    </div>
+    <br/><small>You need at least 1 option</small><br/>
+    <button type="button" class="btn btn-light col-4" id="addOption">
+      Add Option
+      <br/><small>3 options max!</small></br>
+    </button>
+    &nbsp;
+    <br/><br/>
+    <div id="options">
+    </div>
+    <br/><br/>
+    <button type="submit" class="btn btn-success" name="submitGlobalQuestion">Submit</button>
+  </form>
+  <a href="/"><button type="button" class="btn btn-light">Back</button></a>
+</center>
+
+<script type="text/javascript">
+  $(".alert").alert();
+</script>
+<script src="{{url_for('static', filename='js/admin.js')}}" charset="utf-8"></script>
+{% endblock content %}

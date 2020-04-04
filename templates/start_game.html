@@ -1,0 +1,67 @@
+{% extends "template.html" %}
+
+{% block content %}
+<center>
+  <div class="card mb-3" style="width:40%;">
+    <div class="row no-gutters">
+      <div class="col-md-1">
+        {% if (user_info["profile_pic"] | length) > 0 %}
+          {% set profile_pic = user_info["profile_pic"] %}
+          <img src={{profile_pic}} style="height:100px; width:100px;" class="card-img" alt="Profile">
+        {% else %}
+          {% set profile_pic = url_for("static", filename="img/avatar.jpg") %}
+          <img src={{profile_pic}} style="height:50px; width:50px;" class="card-img" alt="Profile">
+        {% endif %}
+      </div>
+      <div class="col-md-10">
+        <div class="card-body">
+          <h5 class="card-title">{{user_info["name"]}}</h5>
+          <p class="card-text">{{user_info["email"]}}</p>
+          <!-- <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p> -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <br/><br/>
+  <div>
+      <form methods="POST" action="/globalTrivia">
+        <button type="submit" class="btn btn-light" name="globalTrivia" id="globalTrivia">
+          Global Trivia
+          <br/><small>Play the universal trivia</small><br/>
+        </button>
+      </form>
+    <br/><br/>
+    <button class="btn btn-light" id="privateTrivia">
+      Private Trivia
+      <br/><small>Play the trivia created by your administrator</small><br/>
+    </button>
+  </div>
+  <br/><br/>
+  <form method="POST" id="enterIDForm" action="/privateTrivia" style="display:none;" class="form-inline">
+    <div class="form-group row mx-sm-3 mb-2 justify-content-center">
+      <label for="triviaID" class="sr-only">Trivia ID</label>
+      <input type="password" class="form-control" id="triviaID" placeholder="TriviaID" required>
+      <button type="submit" class="btn btn-primary" name="privateTrivia">Submit</button>
+    </div>
+  </form>
+  {% if is_admin %}
+    <form methods="POST" action="/addQuestion">
+      <button type="submit" class="btn btn-dark" name="addQuestion" id="addQuestion">
+        Add Questions
+        <br/><small>Only for admins.</small><br/>
+      </button>
+    </form>
+  {% endif %}
+</center>
+
+<script type="text/javascript">
+  document.getElementById("privateTrivia").onclick = function () {
+    if (document.getElementById("enterIDForm").style.display == "none") {
+      document.getElementById("enterIDForm").style.display = "block";
+    }
+    else {
+      document.getElementById("enterIDForm").style.display = "none";
+    }
+  }
+</script>
+{% endblock content %}
