@@ -10,65 +10,8 @@
       </button>
     </div>
   {% endif %}
-</center>
-
-<form method="POST" action="/submitAnswers">
-  {% for question in questions %}
-    {% if questions[question]["QuestionType"] == "MCQ" %}
-    <div class="card">
-      {% set questionTextID = question + "Text" %}
-      {% if result %}
-        {% if result[question]["correct"] == result[question]["given"] %}
-          {% set color = "#98FB98" %}
-        {% else %}
-          {% set color = "#FF7F7F" %}
-        {% endif %}
-        <div class="card-header" style="background-color:{{color}};" id={{questionTextID}}>
-          {{questions[question]["questionText"]}}
-        </div>
-      {% else %}
-        <div class="card-header" id={{questionTextID}}>
-          {{questions[question]["questionText"]}}
-        </div>
-      {% endif %}
-      <div class="card-body">
-        {% for i in range (questions[question]["options"]|length) %}
-          {% if questions[question]["options"][i]|length > 0 %}
-            {% set optionID = question + "_" + (i+1)|string %}
-            <div class="form-check">
-              {% set option = questions[question]['options'][i] %}
-
-              {% if result %}
-                {% set given_answer = result[question]["given"] %}
-                {% set correct_answer = result[question]["correct"] %}
-                {% if given_answer == option %}
-                  <input class="form-check-input" type="radio" name={{question}} id={{optionID}} value='{{option}}' checked disabled>
-                {% else %}
-                  <input class="form-check-input" type="radio" name={{question}} id={{optionID}} value='{{option}}'  disabled>
-                {% endif %}
-                <!-- Assign score -->
-              {% else %}
-                <input class="form-check-input" type="radio" name={{question}} id={{optionID}} value='{{option}}' required>
-              {% endif %}
-              <label class="form-check-label" for={{optionID}}>
-                {{option}}
-              </label>
-            </div>
-          {% endif %}
-        {% endfor %}
-      </div>
-    </div>
-    <br/>
-    {% endif %}
-  {% endfor %}
-  <br/><br/>
-
-{% if not result %}
-  <center><button type="submit" class="btn btn-dark">Submit</button></center>
-{% endif %}
-</form>
-
-<center>
+  <div id="globalQuestionPanel"></div>
+  <button type="button" class="btn btn-primary" id="startGlobalButton" value="Start" onclick="startGame();">Start Game!</button>
   <br/><br/>
   <a href="/"><button type="button" class="btn btn-light">Back</button></a>
 </center>
@@ -76,4 +19,5 @@
 <script type="text/javascript">
   $(".alert").alert();
 </script>
+<script type="text/javascript">{% include "js/play.js" %}</script>
 {% endblock content %}

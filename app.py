@@ -60,6 +60,7 @@ def globalTrivia ():
     cursor.execute("SELECT QuestionID, QuestionType, QuestionText from Question WHERE QuestionGroup = 'Global'")
     result = cursor.fetchall()
     questions = {}
+    answers = {}
     for res in result:
         questionID = res[0]
         cursor.execute("SELECT Option1, Option2, Option3, Answer from Option WHERE QuestionID = ?", (questionID,))
@@ -71,15 +72,17 @@ def globalTrivia ():
         random.shuffle(given_options)
         questions[questionID]["options"] = given_options
         answer_index = int(options[-1]) - 1
-        questions[questionID]["answer"] = options[answer_index]
+        answers[questionID] = options[answer_index]
+        # questions[questionID]["answer"] = options[answer_index]
 
     connection.close()
     session["questions"] = questions
+    session["answers"] = answers
     return redirect(url_for("play"))
 
 @app.route("/addQuestion", methods=["GET", "POST"])
 def addQuestion():
-    if not session["is_admin"]:return redirect(url_for("index"))
+    if (session and "is_admin" in session) and not session["is_admin"]:return redirect(url_for("index"))
     if request.form:
         if "submitGlobalQuestion" in request.form:
             session["submitted_global"] = True
@@ -127,7 +130,9 @@ def submitAnswers () :
     for response in request.form:
         questionID = response
         given_answer = request.form[questionID]
-        correct_answer = questions[questionID]["answer"]
+        options = cursor.execute("SELECT Option1, Option2, Option3, Answer FROM Option WHERE QuestionID = ?", (questionID, )).fetchone()
+        answer_index = int(options[-1]) - 1
+        correct_answer = options[answer_index]
         result[questionID] = {}
         result[questionID]["given"] = given_answer
         result[questionID]["correct"] = correct_answer
@@ -142,11 +147,12 @@ def submitAnswers () :
         connection.commit()
     connection.close()
     session["result"] = result
+    print(result)
     return redirect(url_for("play"))
 
 @app.route("/admin")
 def admin ():
-    if not session["is_admin"]:return redirect(url_for("index"))
+    if (session and "is_admin" in session) and not session["is_admin"]:return redirect(url_for("index"))
     submitted = False
     error_msg = None
     if session:
@@ -165,14 +171,17 @@ def play ():
         if "global" in session["game_type"]:
             msg = None
             questions = None
+            answers = None
             result = None
             if "questions" in session:questions = session["questions"]
             else:msg = "There are no available questions."
+            if "answers" in session:answers = session["answers"]
             if "result" in session:
                 result = session["result"]
                 session.pop("result")
                 print(result)
-            return render_template("play.html", questions=questions, result=result, msg=msg)
+            return render_template("play.html", questions=json.dumps(questions), answers=json.dumps(answers),
+                                    result=result, msg=msg)
         elif "private" in session["game_type"]:
             pass
         else:return redirect(url_for("index"))
@@ -181,9 +190,10 @@ def play ():
 
 @app.route("/")
 def index ():
+    session["is_admin"] = False
     if current_user.is_authenticated:
-        if current_user.email in ADMINS:
-            session["is_admin"] = True
+        for admin in ADMINS:
+            if current_user.email == admin[0]:session["is_admin"] = True
         user_info = {"id": current_user.id_,
                     "name": current_user.name,
                     "email": current_user.email,
