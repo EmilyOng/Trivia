@@ -1,0 +1,40 @@
+{% extends "template.html" %}
+
+{% block content %}
+  <center>
+    <h1><u>Leaderboard</u></h1>
+    <h3>5/(No. of Attempts) * Score</h3>
+    {{results}}
+    <br/><br/>
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Username</th>
+          <th scope="col">Total</th>
+          {% for question in questions %}
+            <th scope="col">
+              {{question[2]}}
+            </th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in range (standings|length) %}
+          <tr>
+            <th scope="row">{{i+1}}</th>
+            <td>{{standings[i][0]}}</td>
+            <td>{{standings[i][1]}}</td>
+            {% for question in questions %}
+              {% if question[0] in results[standings[i][0]] %}
+                <td>{{results[standings[i][0]][question[0]]["Final"]}}</td>
+              {% else %}
+                <td>-</td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+        {% endfor %}
+    </table>
+    <a href="/"><button type="button" class="btn btn-light">Back</button></a>
+  </center>
+{% endblock content %}

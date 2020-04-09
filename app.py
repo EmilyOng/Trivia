@@ -124,18 +124,19 @@ def addQuestion():
 def submitAnswers () :
     if not current_user.is_authenticated:return redirect(url_for("index"))
     questions = session["questions"]
-    result = {}
+    # result = {}
     connection = sqlite3.connect("Trivia.db")
     cursor = connection.cursor()
+    # print(request.form)
     for response in request.form:
         questionID = response
         given_answer = request.form[questionID]
         options = cursor.execute("SELECT Option1, Option2, Option3, Answer FROM Option WHERE QuestionID = ?", (questionID, )).fetchone()
         answer_index = int(options[-1]) - 1
         correct_answer = options[answer_index]
-        result[questionID] = {}
-        result[questionID]["given"] = given_answer
-        result[questionID]["correct"] = correct_answer
+        # result[questionID] = {}
+        # result[questionID]["given"] = given_answer
+        # result[questionID]["correct"] = correct_answer
         attemptNum = cursor.execute("SELECT AttemptNum FROM Score WHERE UserID = ? AND QuestionID = ?", (current_user.id_, questionID)).fetchall()
         if attemptNum == None or len(attemptNum) == 0:
             updatedAttemptNum = 1
@@ -146,8 +147,8 @@ def submitAnswers () :
         cursor.execute("INSERT INTO Score (UserID, QuestionID, AttemptNum, GivenAnswer) VALUES (?, ?, ?, ?)", (current_user.id_, questionID, updatedAttemptNum, given_answer))
         connection.commit()
     connection.close()
-    session["result"] = result
-    print(result)
+    # session["result"] = result
+    # print(result)
     return redirect(url_for("play"))
 
 @app.route("/admin")
@@ -164,6 +165,45 @@ def admin ():
             session.pop("submitted_global")
     return render_template("admin.html", submitted=submitted, error_msg=error_msg)
 
+
+@app.route("/leaderboard")
+def leaderboard ():
+    connection = sqlite3.connect("Trivia.db")
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM Score")
+    results_ = cursor.fetchall()
+    options_ = cursor.execute("SELECT * FROM Option").fetchall()
+    options = {}
+    for option in options_:
+        options[option[0]] = option[int(option[-1])]
+    results = {}
+    names = set()
+    questions = set()
+    for result in results_:
+        name = cursor.execute("SELECT Name FROM User WHERE UserID = ?", (result[0],)).fetchone()[0]
+        names.add(name)
+        questionID = result[1]
+        questions.add(questionID)
+        if name not in results:
+            results[name] = {}
+        if questionID not in results[name]:
+            results[name][questionID] = {}
+            results[name][questionID]["AttemptNum"] = 0
+            results[name][questionID]["Score"] = 0
+        results[name][questionID]["AttemptNum"] = max(results[name][questionID]["AttemptNum"], result[2])
+        results[name][questionID]["Score"] += (str(result[3]) == str(options[questionID]))
+    standings = []
+    for name in names:
+        total_score = 0
+        for question in questions:
+            if question in results[name]:
+                results[name][question]["Final"] = (5*int(results[name][question]["Score"]))/int(results[name][question]["AttemptNum"])
+                total_score += results[name][question]["Final"]
+        standings.append([name, total_score])
+    standings.sort()
+    questions = cursor.execute("SELECT QuestionID, QuestionType, QuestionText FROM Question WHERE QuestionGroup = 'Global'").fetchall()
+    return render_template("leaderboard.html", results=results, questions=questions, standings=standings)
+
 @app.route("/play")
 def play ():
     if not current_user.is_authenticated:return redirect(url_for("index"))
@@ -179,7 +219,7 @@ def play ():
             if "result" in session:
                 result = session["result"]
                 session.pop("result")
-                print(result)
+                # print(result)
             return render_template("play.html", questions=json.dumps(questions), answers=json.dumps(answers),
                                     result=result, msg=msg)
         elif "private" in session["game_type"]:
