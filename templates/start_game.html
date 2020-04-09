@@ -47,8 +47,9 @@
     <div class="form-group row mx-sm-3 mb-2 justify-content-center">
       <label for="triviaID" class="sr-only">Trivia ID</label>
       <input type="password" class="form-control" id="triviaID" placeholder="TriviaID" required>
-      <button type="submit" class="btn btn-primary" name="privateTrivia">Submit</button>
+      <button type="button" class="btn btn-primary" name="privateTrivia">Submit</button>
     </div>
+    <br/><small>This feature has not been implemented yet.</small><br/>
   </form>
   {% if is_admin %}
     <form methods="POST" action="/addQuestion">

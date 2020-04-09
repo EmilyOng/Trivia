@@ -291,11 +291,13 @@ def callback ():
         return render_template("index.html", msg="User email not available or verified by Google.")
 
 @app.route("/logout")
-@login_required
+# @login_required
 def logout ():
-    logout_user()
-    session.clear()
-    return redirect(url_for("index"))
+    try:
+        logout_user()
+        session.clear()
+        return redirect(url_for("index"))
+    except:return redirect(url_for("index"))
 
 
 if __name__ == "__main__":

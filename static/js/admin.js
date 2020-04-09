@@ -1,3 +1,15 @@
+$(document).ready(function() {
+  $(window).keydown(function(event){
+    if(event.keyCode == 13) {
+      event.preventDefault();
+      return false;
+    }
+  });
+});
+
+// https://love2dev.com/blog/javascript-remove-from-array/
+function arrayRemove(arr, value) { return arr.filter(function(ele){ return ele != value; });}
+
 document.getElementById("addToGlobal").onclick = function () {
   if (document.getElementById("addToGlobalForm").style.display == "none") {
     document.getElementById("addToGlobalForm").style.display = "block";
@@ -83,5 +95,57 @@ function deleteOption (option) {
       addedOption.children[1].setAttribute("name", "optionText"+newID); // Assign input name
     }
   }
+}
 
+document.getElementById("enterTags").addEventListener("keyup", function(event) {
+  var tag = document.getElementById("enterTags");
+  var added_tag = tag.value;
+  var input = document.getElementById("getTags");
+  if (event.keyCode === 13) { // Enter key is pressed
+    event.preventDefault();
+    var curr_tags = input.value.split(",");
+    var found = false;
+    for (var i = 0; i < curr_tags.length; i ++) {
+        if (curr_tags[i] == added_tag) {
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        curr_tags.push(added_tag);
+        input.setAttribute("value", curr_tags.join(","));
+        var span = document.createElement("span");
+        span.setAttribute("class", "badge badge-light");
+        span.id = "span_"+added_tag;
+        span.appendChild(document.createTextNode(added_tag));
+        var deleteButton = document.createElement("button");
+        deleteButton.setAttribute("class", "btn btn-dark");
+        deleteButton.id = added_tag;
+        deleteButton.type = "button";
+        deleteButton.setAttribute("onclick", "deleteTag(this);");
+        deleteButton.appendChild(document.createTextNode("\u2573"));
+        span.appendChild(deleteButton);
+        document.getElementById("tagsPanel").appendChild(span);
+        document.getElementById("tagsPanel").appendChild(document.createTextNode("\u00A0"));
+        tag.value = "";
+
+    }
+  }
+});
+
+function deleteTag (btn) {
+    var id = btn.id;
+    var tagsPanel = document.getElementById("tagsPanel");
+    var tags = tagsPanel.children;
+    var input = document.getElementById("getTags");
+    var inputValue = input.value.split(",");
+    for (var i = 0; i < tags.length; i ++) {
+        var tag = tags[i];
+        if (tag.id == "span_"+id) {
+            inputValue = arrayRemove(inputValue, id);
+            input.setAttribute("value", inputValue.join(","));
+            tag.parentNode.removeChild(tag);
+            break;
+        }
+    }
 }
