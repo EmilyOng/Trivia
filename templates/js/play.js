@@ -9,16 +9,38 @@ window.addEventListener("DOMContentLoaded", (event) => {
     if (askedQuestions != null) {
       button.style.display = "none";
       if (askedQuestions.length == questions.length) {
-        resetGame();
-        showResults();
-        document.getElementById("PAGlobalButton").style.display = "block";
+        var updates = updateGame();
+        if (!updates) {
+            resetGame();
+            showResults();
+            document.getElementById("PAGlobalButton").style.display = "block";
+        }
+        else {
+            showQuestion();
+        }
       }
       else {
         showQuestion();
       }
     }
+    else { startGame(); }
 });
 
+function updateGame () {
+  var questionID_storage = JSON.parse(localStorage.getItem("Trivia_ID"));
+  var questions_storage = JSON.parse(localStorage.getItem("Trivia_Questions"));
+  var updates = false;
+  for (var question in questions) {
+      if (!questionID_storage.includes(question)) {
+          questions_storage[question] = questions[question];
+          questionID_storage.push(question);
+          updates = true;
+      }
+  }
+  localStorage.setItem("Trivia_Questions", JSON.stringify(questions_storage));
+  localStorage.setItem("Trivia_ID", JSON.stringify(questionID_storage));
+  return updates;
+}
 
 function resetGame () {
   localStorage.setItem("Trivia_Questions", JSON.stringify(questions));
@@ -76,6 +98,13 @@ function showQuestion () {
     var cardTitle = document.getElementsByClassName("cardTitle");
     cardTitle = cardTitle[cardTitle.length - 1];
     cardTitle.appendChild(document.createTextNode(question["questionText"]));
+    var tags = question["questionTag"];
+    if (tags.length > 0) { cardTitle.innerHTML += "<br/>"; }
+    for (var i = 0; i < tags.length; i ++) {
+        var tag = tags[i];
+        var span = "<span class='badge badge-pill badge-info'>"+tag+"</span>";
+        cardTitle.innerHTML += span + "&nbsp";
+    }
 
     var form = document.createElement("form");
     form.setAttribute("method", "POST");
@@ -112,7 +141,9 @@ function showQuestion () {
     form.innerHTML += msg;
     var msgs = document.getElementsByClassName("questionMessage");
     msgs[msgs.length - 1]. setAttribute("id", "msg_"+chosenQuestion);
-    form.innerHTML += "<br/><button type='submit' style='display:none;' value='' class='btn btn-success checkAnswerButton'>Next</button>";
+    form.innerHTML += "<br/><button type='submit' style='display:none;' value='' class='btn btn-success checkAnswerButton'>\
+                      Next<br/><small>Save your results</small><br/>\
+                      </button>";
     var checkAnswerButtons = document.getElementsByClassName("checkAnswerButton");
     var index = checkAnswerButtons.length;
     checkAnswerButtons[index - 2].setAttribute("id", "check_"+chosenQuestion);
@@ -121,9 +152,15 @@ function showQuestion () {
   }
   else {
     // Out of questions
-    showResults();
-    resetGame();
-    document.getElementById("PAGlobalButton").style.display = "block";
+    var updates = updateGame();
+    if (!updates) {
+      showResults();
+      resetGame();
+      document.getElementById("PAGlobalButton").style.display = "block";
+    }
+    else {
+        showQuestion();
+    }
   }
 }
 

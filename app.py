@@ -58,7 +58,7 @@ def globalTrivia ():
     session["game_type"] = "global"
     connection = sqlite3.connect("Trivia.db")
     cursor = connection.cursor()
-    cursor.execute("SELECT QuestionID, QuestionType, QuestionText from Question WHERE QuestionGroup = 'Global'")
+    cursor.execute("SELECT QuestionID, QuestionType, QuestionText, QuestionTag from Question WHERE QuestionGroup = 'Global'")
     result = cursor.fetchall()
     questions = {}
     answers = {}
@@ -67,8 +67,10 @@ def globalTrivia ():
         cursor.execute("SELECT Option1, Option2, Option3, Answer from Option WHERE QuestionID = ?", (questionID,))
         options = cursor.fetchone()
         questions[questionID] = {}
-        questions[questionID]["QuestionType"] = res[1]
+        questions[questionID]["questionType"] = res[1]
         questions[questionID]["questionText"] = res[2]
+        if res[3]:questions[questionID]["questionTag"] = res[3].split(",")
+        else:questions[questionID]["questionTag"] = ""
         given_options = [options[0], options[1], options[2]]
         random.shuffle(given_options)
         questions[questionID]["options"] = given_options
@@ -103,6 +105,10 @@ def addQuestion():
                 session["error_msg"] = "The options must be unique."
             else:
                 answer = request.form["answer"]
+                tags = ""
+                if "getTags" in request.form:
+                    tags = request.form["getTags"][1:]
+
                 questionID = unique_digits(4, "G")
                 connection = sqlite3.connect("Trivia.db")
                 cursor = connection.cursor()
@@ -111,8 +117,8 @@ def addQuestion():
                     result = cursor.fetchone()
                     if result!=None:questionID = unique_digits(4, "G")
                     else:break
-                cursor.execute("INSERT INTO Question (QuestionID, QuestionGroup, QuestionType, QuestionText) VALUES (?, ?, ?, ?)",
-                                (questionID, "Global", "MCQ", questionText))
+                cursor.execute("INSERT INTO Question (QuestionID, QuestionGroup, QuestionType, QuestionText, QuestionTag) VALUES (?, ?, ?, ?, ?)",
+                                (questionID, "Global", "MCQ", questionText, tags))
                 connection.commit()
                 cursor.execute("INSERT INTO Option (QuestionID, Option1, Option2, Option3, Answer) VALUES (?, ?, ?, ?, ?)",
                                 (questionID, options[0], options[1], options[2], answer))

@@ -30,7 +30,7 @@
           <br/><small>Play the universal trivia</small><br/>
         </button>
       </form>
-    <br/><br/>
+    <br/>
     <button class="btn btn-light" id="privateTrivia">
       Private Trivia
       <br/><small>Play the trivia created by your administrator</small><br/>
@@ -49,7 +49,7 @@
       <input type="password" class="form-control" id="triviaID" placeholder="TriviaID" required>
       <button type="button" class="btn btn-primary" name="privateTrivia">Submit</button>
     </div>
-    <br/><small>This feature has not been implemented yet.</small><br/>
+    <br/><small>This feature has not been implemented yet.</small><br/><br/>
   </form>
   {% if is_admin %}
     <form methods="POST" action="/addQuestion">
