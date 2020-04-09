@@ -98,7 +98,7 @@ function showQuestion () {
         form.innerHTML += optionForm;
         var gameOption = document.getElementsByClassName("gameOption");
         gameOption = gameOption[gameOption.length - 1];
-        // gameOption.children[0].setAttribute("name", chosenQuestion);
+        gameOption.children[0].setAttribute("name", "qn");
         gameOption.children[0].setAttribute("value", option);
         gameOption.children[0].setAttribute("class", "question_"+chosenQuestion);
         gameOption.children[0].setAttribute("id", "question"+String(i+1)+"_"+chosenQuestion);

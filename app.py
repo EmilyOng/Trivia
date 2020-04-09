@@ -1,3 +1,4 @@
+#!/usr/bin/env python3.7
 from flask import Flask, redirect, request, url_for, render_template, session
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user
 from oauthlib.oauth2 import WebApplicationClient
@@ -298,4 +299,4 @@ def logout ():
 
 
 if __name__ == "__main__":
-    app.run(ssl_context="adhoc", debug=True)
+    app.run(ssl_context="adhoc")
